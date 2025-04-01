@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Agência de Eventos</title>
+
+    <!-- Importando o Pico CSS -->
+    <link rel="stylesheet" href="css/pico.min.css" />
+    <style>
+      /* Customizações adicionais */
+      .login-container {
+        max-width: 400px;
+        margin: 80px auto;
+      }
+      .error-message {
+        color: red;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="login-container">
+        <h1>Login</h1>
+        <div id="errorMsg" class="error-message" style="display: none"></div>
+        <form id="loginForm">
+          <label for="username">Usuário</label>
+          <input type="text" id="username" name="username" required />
+
+          <label for="password">Senha</label>
+          <input type="password" id="password" name="password" required />
+
+          <button type="submit">Entrar</button>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const loginForm = document.getElementById("loginForm");
+      const errorMsg = document.getElementById("errorMsg");
+
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault(); // evita o recarregamento da página
+
+        // Obtém os valores do formulário
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        try {
+          // Chama a rota de login do back-end
+          const response = await fetch(
+            "https://marcos-ifnmg-backend.vercel.app/login",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ username, password }),
+            }
+          );
+
+          if (response.ok) {
+            // Login válido: redireciona para dashboard.html
+            window.location.href = "dashboard.html";
+          } else {
+            // Exibe mensagem de erro
+            const data = await response.json();
+            errorMsg.textContent = data.error || "Credenciais inválidas";
+            errorMsg.style.display = "block";
+          }
+        } catch (error) {
+          errorMsg.textContent = "Erro ao conectar ao servidor.";
+          errorMsg.style.display = "block";
+        }
+      });
+    </script>
+  </body>
+</html>

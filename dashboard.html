@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Agência de Eventos</title>
+    <!-- Importando o Pico CSS -->
+    <link rel="stylesheet" href="css/pico.min.css" />
+    <style>
+      /* Customizações adicionais */
+      header.top-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+      .navbar {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      .statistics {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+      }
+      .stat-card {
+        padding: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 0.5rem;
+        text-align: center;
+        min-width: 120px;
+      }
+      .logout-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Botão de Sair -->
+    <button class="logout-btn" onclick="logout()">Sair</button>
+
+    <!-- Título principal -->
+    <header class="top-header">
+      <h1>Agência de Eventos</h1>
+    </header>
+
+    <!-- Navbar -->
+    <header>
+      <nav class="navbar">
+        <a href="eventos/dashboard-eventos.html" class="contrast"
+          >Gerenciamento de Eventos</a
+        >
+        <a href="cliente/dashboard-cliente.html" class="contrast"
+          >Gerenciamento de Clientes</a
+        >
+        <span id="usuariosLinkPlaceholder"></span>
+      </nav>
+    </header>
+
+    <!-- Conteúdo principal da Dashboard -->
+    <main class="container">
+      <!-- Seção de estatísticas -->
+      <section class="statistics">
+        <div class="stat-card">
+          <h3>Eventos</h3>
+          <p id="totalEventos">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Clientes</h3>
+          <p id="totalClientes">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Usuários</h3>
+          <p id="totalUsuarios">0</p>
+        </div>
+      </section>
+
+      <!-- Conteúdo adicional -->
+      <section>
+        <h2>Dashboard</h2>
+        <p>Bem-vindo à sua Dashboard da Agência de Eventos!</p>
+        <p>Aqui você encontra informações gerais sobre a empresa.</p>
+      </section>
+    </main>
+
+    <script>
+      // Recupera os dados do usuário logado (exemplo de localStorage, ajuste se necessário)
+      const currentUser = JSON.parse(localStorage.getItem("currentUser")) || {
+        id: 1,
+        username: "admin",
+        role: "admin",
+      };
+
+      // Exibe o link "Usuários do Sistema" se desejar (ou retire a verificação se não for mais baseada em role)
+      if (currentUser.role === "admin") {
+        document.getElementById("usuariosLinkPlaceholder").innerHTML =
+          '<a href="usuarios/dashboard-usuarios.html" class="contrast">Usuários do Sistema</a>';
+      }
+
+      function logout() {
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
+      }
+
+      async function loadStatistics() {
+        try {
+          const response = await fetch(
+            "https://marcos-ifnmg-backend.vercel.app/statistics"
+          );
+          if (!response.ok) {
+            throw new Error("Erro ao carregar estatísticas");
+          }
+          const stats = await response.json();
+          document.getElementById("totalEventos").textContent =
+            stats.totalEventos;
+          document.getElementById("totalClientes").textContent =
+            stats.totalClientes;
+          document.getElementById("totalUsuarios").textContent =
+            stats.totalUsuarios;
+        } catch (error) {
+          console.error("Erro ao carregar estatísticas:", error);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", loadStatistics);
+    </script>
+  </body>
+</html>

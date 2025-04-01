@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard de Eventos - Agência de Eventos</title>
+    <!-- Importando o Pico CSS -->
+    <link rel="stylesheet" href="../css/pico.min.css" />
+    <style>
+      .container {
+        max-width: 1000px;
+        margin: 2rem auto;
+      }
+      .top-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      section {
+        margin-bottom: 2rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem;
+        border-bottom: 1px solid #ccc;
+      }
+      th {
+        background-color: #f3f3f3;
+      }
+      button {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <!-- Cabeçalho com título e botões para navegação -->
+      <header class="top-section">
+        <div class="nav-buttons">
+          <a href="./../dashboard.html" class="contrast"
+            >&larr; Dashboard Principal</a
+          >
+          <a href="cadastrar-evento.html" class="contrast">Cadastrar Evento</a>
+        </div>
+        <h1>Dashboard de Eventos</h1>
+      </header>
+
+      <!-- Seção de eventos para hoje -->
+      <section id="eventsTodaySection">
+        <h2>Eventos para Hoje</h2>
+        <div id="eventsToday">
+          <p>Carregando eventos para hoje...</p>
+        </div>
+      </section>
+
+      <!-- Seção de eventos pendentes -->
+      <section id="pendingEventsSection">
+        <h2>Eventos Pendentes</h2>
+        <div id="pendingEvents">
+          <p>Carregando eventos pendentes...</p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      async function fetchEventos() {
+        try {
+          const response = await fetch(
+            "https://marcos-ifnmg-backend.vercel.app/eventos"
+          );
+          if (!response.ok) {
+            throw new Error("Erro ao carregar eventos");
+          }
+          const eventos = await response.json();
+          console.log("Eventos retornados:", eventos); // Debug
+
+          // Obtém a data atual no formato "YYYY-MM-DD" com base no horário local
+          const hoje = new Date();
+          const ano = hoje.getFullYear();
+          const mes = ("0" + (hoje.getMonth() + 1)).slice(-2);
+          const dia = ("0" + hoje.getDate()).slice(-2);
+          const today = `${ano}-${mes}-${dia}`;
+          console.log("Data de hoje:", today); // Debug
+
+          // Filtra os eventos com base na data
+          const eventosHoje = eventos.filter(
+            (evento) => evento.data_evento === today
+          );
+          const eventosPendentes = eventos.filter(
+            (evento) => evento.data_evento > today
+          );
+
+          renderEventos("eventsToday", eventosHoje);
+          renderEventos("pendingEvents", eventosPendentes);
+        } catch (error) {
+          document.getElementById("eventsToday").innerHTML =
+            "<p>Erro ao carregar eventos para hoje.</p>";
+          document.getElementById("pendingEvents").innerHTML =
+            "<p>Erro ao carregar eventos pendentes.</p>";
+          console.error(error);
+        }
+      }
+
+      function renderEventos(containerId, eventos) {
+        const container = document.getElementById(containerId);
+        if (eventos.length === 0) {
+          container.innerHTML = "<p>Nenhum evento encontrado.</p>";
+          return;
+        }
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome do Evento</th>
+                <th>Cliente</th>
+                <th>Data</th>
+                <th>Local</th>
+                <th>Tipo</th>
+                <th>Duração (horas)</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        eventos.forEach((evento) => {
+          html += `
+            <tr>
+              <td>${evento.id}</td>
+              <td>${evento.nome_evento}</td>
+              <td>${evento.nome_cliente || "-"}</td>
+              <td>${evento.data_evento}</td>
+              <td>${evento.local_evento}</td>
+              <td>${evento.tipo_evento}</td>
+              <td>${evento.horas_duracao || "-"}</td>
+              <td><button onclick="deleteEvento(${
+                evento.id
+              })">Excluir</button></td>
+            </tr>
+          `;
+        });
+        html += `
+            </tbody>
+          </table>
+        `;
+        container.innerHTML = html;
+      }
+
+      async function deleteEvento(id) {
+        if (!confirm("Tem certeza que deseja excluir este evento?")) return;
+        try {
+          const response = await fetch(
+            `https://marcos-ifnmg-backend.vercel.app/eventos/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
+          if (response.ok) {
+            alert("Evento excluído com sucesso.");
+            fetchEventos(); // Atualiza a lista
+          } else {
+            alert("Erro ao excluir evento.");
+          }
+        } catch (error) {
+          alert("Erro ao conectar com o servidor.");
+          console.error(error);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", fetchEventos);
+    </script>
+  </body>
+</html>

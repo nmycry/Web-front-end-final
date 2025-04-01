@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastrar Evento - Agência de Eventos</title>
+    <!-- Importando o Pico CSS -->
+    <link rel="stylesheet" href="../css/pico.min.css" />
+    <style>
+      /* Customizações adicionais */
+      .container {
+        max-width: 600px;
+        margin: 2rem auto;
+      }
+      .back-btn {
+        margin-bottom: 1rem;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <!-- Botão para voltar ao dashboard -->
+      <a href="dashboard-eventos.html" class="back-btn"
+        >&larr; Voltar ao Dashboard</a
+      >
+      <h1>Cadastrar Evento</h1>
+      <form id="eventoForm">
+        <label for="nome_evento">Nome do Evento</label>
+        <input type="text" id="nome_evento" name="nome_evento" required />
+
+        <label for="cliente">Cliente</label>
+        <select id="cliente" name="cliente" required>
+          <option value="">Carregando clientes...</option>
+        </select>
+
+        <label for="meio_agendamento">Meio de Agendamento</label>
+        <select id="meio_agendamento" name="meio_agendamento" required>
+          <option value="">Selecione</option>
+          <option value="Whatsapp">Whatsapp</option>
+          <option value="Email">Email</option>
+          <option value="Presencialmente">Presencialmente</option>
+          <option value="telefone">Telefone</option>
+        </select>
+
+        <label for="local_evento">Local do Evento</label>
+        <input type="text" id="local_evento" name="local_evento" required />
+
+        <label for="data_evento">Data do Evento</label>
+        <input type="date" id="data_evento" name="data_evento" required />
+
+        <label for="tipo_evento">Tipo de Evento</label>
+        <select id="tipo_evento" name="tipo_evento" required>
+          <option value="">Selecione</option>
+          <option value="Casamento">Casamento</option>
+          <option value="Aniversário">Aniversário</option>
+          <option value="Corporativo">Corporativo</option>
+          <option value="Outro">Outro</option>
+        </select>
+
+        <label for="atendente_responsavel">Atendente Responsável</label>
+        <input
+          type="text"
+          id="atendente_responsavel"
+          name="atendente_responsavel"
+          required
+        />
+
+        <label for="horas_duracao">Horas de Duração</label>
+        <input type="number" id="horas_duracao" name="horas_duracao" required />
+
+        <label for="observacoes">Observações</label>
+        <textarea id="observacoes" name="observacoes"></textarea>
+
+        <button type="submit">Salvar Evento</button>
+      </form>
+    </main>
+
+    <script>
+      // Função para popular o select de clientes
+      async function fetchClientes() {
+        try {
+          const response = await fetch(
+            "https://marcos-ifnmg-backend.vercel.app/clientes"
+          );
+          if (!response.ok) {
+            throw new Error("Erro ao carregar clientes");
+          }
+          const clientes = await response.json();
+          const clienteSelect = document.getElementById("cliente");
+          clienteSelect.innerHTML = ""; // Limpa as opções existentes
+
+          if (clientes.length === 0) {
+            clienteSelect.innerHTML =
+              '<option value="">Nenhum cliente cadastrado</option>';
+          } else {
+            // Cria uma opção padrão
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "Selecione";
+            clienteSelect.appendChild(defaultOption);
+
+            // Preenche o select com os clientes
+            clientes.forEach((cliente) => {
+              const option = document.createElement("option");
+              option.value = cliente.id;
+              option.textContent = cliente.nome_completo;
+              clienteSelect.appendChild(option);
+            });
+          }
+        } catch (error) {
+          console.error("Erro ao buscar clientes:", error);
+          const clienteSelect = document.getElementById("cliente");
+          clienteSelect.innerHTML =
+            '<option value="">Erro ao carregar clientes</option>';
+        }
+      }
+
+      // Chama a função para carregar os clientes assim que a página é carregada
+      document.addEventListener("DOMContentLoaded", fetchClientes);
+
+      // Manipula o envio do formulário
+      const eventoForm = document.getElementById("eventoForm");
+
+      eventoForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Coleta os dados do formulário
+        const formData = {
+          nome_evento: document.getElementById("nome_evento").value,
+          cliente: parseInt(document.getElementById("cliente").value),
+          meio_agendamento: document.getElementById("meio_agendamento").value,
+          local_evento: document.getElementById("local_evento").value,
+          data_evento: document.getElementById("data_evento").value,
+          tipo_evento: document.getElementById("tipo_evento").value,
+          atendente_responsavel: document.getElementById(
+            "atendente_responsavel"
+          ).value,
+          horas_duracao: parseInt(
+            document.getElementById("horas_duracao").value
+          ),
+          observacoes: document.getElementById("observacoes").value,
+        };
+
+        try {
+          const response = await fetch(
+            "https://marcos-ifnmg-backend.vercel.app/eventos",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formData),
+            }
+          );
+
+          if (response.ok) {
+            // Redireciona para o dashboard de eventos se o evento for salvo com sucesso
+            window.location.href = "dashboard-eventos.html";
+          } else {
+            alert("Erro ao salvar o evento.");
+          }
+        } catch (error) {
+          console.error("Erro na requisição:", error);
+          alert("Erro ao conectar com o servidor.");
+        }
+      });
+    </script>
+  </body>
+</html>
