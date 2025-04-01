@@ -2,6 +2,7 @@
 # 🎉 Agência de Eventos — API + Front-End
 
 Este é um projeto completo de **cadastro de clientes e eventos**, com autenticação de usuários e exibição de estatísticas, desenvolvido como proposta de **trabalho acadêmico** ou aplicação real. A API é construída em **Node.js com Express**, persistência em **PostgreSQL**, e front-end com **HTML + PicoCSS**.
+Projeto criado por Jhonatan rotta Santana, Marcos Cabral Barbosa e Henrique Cavalcante Rodrigues.
 
 ## 📌 Funcionalidades
 
@@ -115,4 +116,5 @@ CORS significa "Cross-Origin Resource Sharing". Esse middleware permite que o fr
 É um framework CSS minimalista.
 
 👉 Com ele, os formulários e botões já ficam bonitos e responsivos sem precisar escrever estilos manuais.
+
 
